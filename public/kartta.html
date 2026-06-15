@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mustikkakartta</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
+
+  <style>
+    body { margin: 0; font-family: Arial; }
+    #map { height: 100vh; width: 100%; }
+
+    #ui {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      max-width: 220px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    }
+
+    .row { margin-bottom: 6px; }
+
+    .berry-marker {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid white;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .green { background: #2e7d32; }
+    .orange { background: #f7920c; }
+  </style>
+</head>
+
+<body>
+
+<div id="ui">
+  <button onclick="goHome()" style="width:100%;margin-bottom:8px;padding:6px;background:#333;color:#fff;border:none;border-radius:6px;">
+    ← Etusivu
+  </button>
+
+  <button onclick="locateMe()" style="width:100%;margin-bottom:8px;padding:6px;background:#1976d2;color:#fff;border:none;border-radius:6px;">
+    📍 Paikanna sijainti
+  </button>
+
+  <div><b>Filtteri</b></div>
+
+  <label><input type="checkbox" id="showSavipuoli" checked> Savipuoli</label><br/>
+  <label><input type="checkbox" id="showLaikkupikari" checked> Laikkupikari</label>
+
+  <div id="coords" style="margin-top:8px;">Klikkaa karttaa</div>
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+
+
+<script>
+let gpsCoords = null;
+const bounds = [[59.5, 19.0],[70.5, 32.0]];
+
+const map = L.map("map", {
+  preferCanvas: true,
+  maxBounds: bounds,
+  maxBoundsViscosity: 1.0,
+  minZoom: 5,
+  maxZoom: 18
+}).setView([65.0121, 25.4651], 6);
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "&copy; OpenStreetMap"
+}).addTo(map);
+
+/* ✅ MUUTOS 1: vain Suomen ääriviiva + tallennetaan layer */
+let finlandLayer;
+let finlandBuffered;
+
+fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries/FIN.geo.json")
+  .then(r => r.json())
+  .then(data => {
+
+    // ✅ buffer 1 km
+    finlandBuffered = turf.buffer(data, 8, { units: "kilometers" });
+
+    finlandLayer = L.geoJSON(finlandBuffered, {
+      style: {
+        weight: 0,
+        fillOpacity: 0
+      }
+    }).addTo(map);
+  });
+
+
+const clusterGroup = L.markerClusterGroup({
+  showCoverageOnHover: false
+});
+map.addLayer(clusterGroup);
+
+let markers = [];
+let gpsMarker = null;
+
+function getIcon(type) {
+  const isSavipuoli = type === "savipuoli";
+
+  return L.divIcon({
+    className: "",
+    html: `
+      <div class="berry-marker ${isSavipuoli ? "green" : "orange"}">
+        ${isSavipuoli ? "🫐" : "🌿"}
+      </div>
+    `,
+    iconSize: [22, 22],
+    iconAnchor: [11, 11]
+  });
+}
+
+function applyFilter() {
+  const showSavipuoli = document.getElementById("showSavipuoli").checked;
+  const showLaikkupikari = document.getElementById("showLaikkupikari").checked;
+
+  markers.forEach(m => {
+    const visible =
+      (m.type === "savipuoli" && showSavipuoli) ||
+      (m.type === "laikkupikari" && showLaikkupikari);
+
+    if (visible) clusterGroup.addLayer(m.marker);
+    else clusterGroup.removeLayer(m.marker);
+  });
+}
+
+document.getElementById("showSavipuoli").onchange = applyFilter;
+document.getElementById("showLaikkupikari").onchange = applyFilter;
+
+function loadPoints() {
+  fetch("/points")
+    .then(r => r.json())
+    .then(points => {
+      markers = [];
+      clusterGroup.clearLayers();
+      points.forEach(addMarker);
+      applyFilter();
+    });
+}
+
+function addMarker(p) {
+  const marker = L.marker([p.lat, p.lng], {
+    icon: getIcon(p.type)
+  });
+
+  marker.bindPopup(`
+    <b>${p.type}</b><br/>
+
+    ${escapeHtml(p.note || "")}
+
+    <br/><br/>
+
+    📍 ${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}
+
+    <br/>
+
+    🕒 ${
+      p.created_at
+        ? new Date(p.created_at + "Z").toLocaleString("fi-FI", {
+            timeZone: "Europe/Helsinki"
+          })
+        : ""
+    }
+
+    
+  <br/> 
+  📍<a href="https://www.google.com/maps?q=${p.lat},${p.lng}" target="_blank">
+    Avaa Google Maps
+  </a>
+`);
+
+
+  markers.push({ marker, type: p.type });
+  clusterGroup.addLayer(marker);
+}
+
+/* ✅ MUUTOS 2: polygon check */
+function pointInPolygon(point, layer) {
+  const latlngs = layer.getLatLngs();
+
+  function isInsideRing(ring) {
+    let x = point.lng, y = point.lat;
+    let inside = false;
+
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const xi = ring[i].lng, yi = ring[i].lat;
+      const xj = ring[j].lng, yj = ring[j].lat;
+
+      const intersect =
+        ((yi > y) !== (yj > y)) &&
+        (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+
+      if (intersect) inside = !inside;
+    }
+
+    return inside;
+  }
+
+  function checkPolygon(polygon) {
+    // polygon = [outerRing, hole1, hole2...]
+    if (!isInsideRing(polygon[0])) return false;
+
+    // jos osuu "reikään" → EI sallittu
+    for (let i = 1; i < polygon.length; i++) {
+      if (isInsideRing(polygon[i])) return false;
+    }
+
+    return true;
+  }
+
+  // 🔥 TÄRKEÄ: käsitellään oikein kaikki tapaukset
+  if (layer.feature.geometry.type === "MultiPolygon") {
+    return latlngs.some(polygon => checkPolygon(polygon));
+  }
+
+  if (layer.feature.geometry.type === "Polygon") {
+    return checkPolygon(latlngs);
+  }
+
+  return false;
+}
+
+function isInsideFinland(latlng) {
+  let inside = false;
+
+  if (!finlandLayer) return false;
+
+  finlandLayer.eachLayer(layer => {
+    if (layer.getBounds && layer.getBounds().contains(latlng)) {
+      if (pointInPolygon(latlng, layer)) {
+        inside = true;
+      }
+    }
+  });
+
+  return inside;
+}
+
+/* ✅ MUUTOS 3: estetään klikkaus Suomen ulkopuolella */
+map.on("click", (e) => {
+
+  if (!isInsideFinland(e.latlng)) {
+    alert("Havainto sallittu vain Suomen alueella");
+    return;
+  }
+
+  const lat = e.latlng.lat;
+  const lng = e.latlng.lng;
+
+  openObservation(lat, lng);
+});
+
+function openObservation(lat, lng) {
+
+  const popupContent = document.createElement("div");
+
+  popupContent.innerHTML = `
+    <div class="row">
+      <select id="type">
+        <option value="savipuoli">Savipuoli mustikka</option>
+        <option value="laikkupikari">Mustikanlaikkupikari</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <input id="note" placeholder="huomio..." style="width:150px" maxlength="120"/>
+    </div>
+
+    <button id="saveBtn">Tallenna</button>
+  `;
+
+  L.popup()
+    .setLatLng([lat, lng])
+    .setContent(popupContent)
+    .openOn(map);
+
+  function save() {
+
+    const type = popupContent.querySelector("#type").value;
+    const note = popupContent.querySelector("#note").value;
+    
+    if (note.length >= 120) {
+      alert("Huomio on liian pitkä (max 120 merkkiä)");
+      return;
+    }
+
+    fetch("/points", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        lat,
+        lng,
+        note,
+        type,
+        gps_lat: gpsCoords?.lat ?? null,
+        gps_lng: gpsCoords?.lng ?? null
+      })
+    })
+    .then(async (res) => {
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Tallennus epäonnistui");
+      }
+
+      return data;
+    })
+    .then(() => {
+      loadPoints();
+      map.closePopup();
+
+      if (gpsMarker) {
+        map.removeLayer(gpsMarker);
+        gpsMarker = null;
+      }
+    })
+    .catch((err) => {
+      alert(err.message);
+    });
+  }
+
+  popupContent.querySelector("#saveBtn").onclick = save;
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function locateMe() {
+
+  if (!navigator.geolocation) {
+    alert("GPS ei toimi");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition((pos) => {
+
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
+
+    gpsCoords = {
+      lat: pos.coords.latitude,
+      lng: pos.coords.longitude
+    };
+
+    if (gpsMarker) map.removeLayer(gpsMarker);
+
+    gpsMarker = L.marker([lat, lng], {
+      icon: L.divIcon({
+        className: "",
+        html: `<div style="width:14px;height:14px;background:#1e88e5;border-radius:50%;border:2px solid white"></div>`,
+        iconSize: [14,14],
+        iconAnchor: [7,7]
+      })
+    }).addTo(map);
+
+    map.setView([lat, lng], 14);
+
+  });
+}
+
+function goHome() {
+  window.location.href = "/";
+}
+
+loadPoints();
+
+</script>
+
+</body>
+</html>
