@@ -1,15 +1,20 @@
+require("dotenv").config();
 const express = require("express");
-const Database = require("better-sqlite3");
+const { createClient } = require("@supabase/supabase-js");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
+
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 
-// DB (luodaan jos ei ole)
-const db = new Database("points.db");
+// SUPABASE
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
 
 const pointLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minuutti
@@ -18,49 +23,50 @@ const pointLimiter = rateLimit({
     error: "Liikaa tallennuksia. Yritä hetken päästä uudelleen."
   }
 });
-// 🔥 auto-init taulu (EI tarvitse poistaa db:tä enää)
-db.exec(`
-CREATE TABLE IF NOT EXISTS points (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  lat REAL,
-  lng REAL,
-  note TEXT,
-  type TEXT,
-  gps_lat REAL,
-  gps_lng REAL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-)
-`);
+
+
 
 // GET
-app.get("/points", (req, res) => {
-  const rows = db.prepare("SELECT * FROM points").all();
-  res.json(rows);
+app.get("/points", async (req, res) => {
+  const { data, error } = await supabase
+    .from("points")
+    .select("*");
+
+  if (error) {
+    return res.status(500).json({ error: error.message });
+  }
+
+  res.json(data);
 });
 
 // POST
-app.post("/points", pointLimiter, (req, res) => {
+app.post("/points", pointLimiter, async (req, res) => {
   const { lat, lng, note, type, gps_lat, gps_lng } = req.body;
 
   if (typeof lat !== "number" || typeof lng !== "number") {
     return res.status(400).json({ error: "invalid coordinates" });
   }
 
-  const stmt = db.prepare(`
-    INSERT INTO points (lat, lng, note, type, gps_lat, gps_lng)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `);
+  const { data, error } = await supabase
+    .from("points")
+    .insert([
+      {
+        lat,
+        lng,
+        note: note || "",
+        type: type || "savipuoli",
+        gps_lat: gps_lat ?? null,
+        gps_lng: gps_lng ?? null
+      }
+    ])
+    .select()
+    .single();
 
-  const info = stmt.run(
-    lat,
-    lng,
-    note || "",
-    type || "savipuoli",
-    gps_lat ?? null,
-    gps_lng ?? null
-  );
+  if (error) {
+    return res.status(500).json({ error: error.message });
+  }
 
-  res.json({ id: info.lastInsertRowid });
+  res.json({ id: data.id, ...data });
 });
 
 // 🔥 server start

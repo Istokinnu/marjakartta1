@@ -175,7 +175,7 @@ function addMarker(p) {
 
     🕒 ${
       p.created_at
-        ? new Date(p.created_at + "Z").toLocaleString("fi-FI", {
+        ? new Date(p.created_at).toLocaleString("fi-FI", {
             timeZone: "Europe/Helsinki"
           })
         : ""
