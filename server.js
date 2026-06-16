@@ -6,7 +6,7 @@ const rateLimit = require("express-rate-limit");
 
 const app = express();
 
-app.set("trust proxy", 2);
+app.set("trust proxy", 3);
 
 app.use(cors());
 app.use(express.json());
