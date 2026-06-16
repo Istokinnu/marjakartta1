@@ -43,9 +43,7 @@ app.get("/points", async (req, res) => {
 
 // POST
 app.post("/points", pointLimiter, async (req, res) => {
-  console.log("req.ip =", req.ip);
-  console.log("req.ips =", req.ips);
-  console.log("xff =", req.headers["x-forwarded-for"]);
+
   const { lat, lng, note, type, gps_lat, gps_lng } = req.body;
 
   if (typeof lat !== "number" || typeof lng !== "number") {
