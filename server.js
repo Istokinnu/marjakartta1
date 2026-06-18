@@ -72,6 +72,12 @@ app.post("/points", pointLimiter, async (req, res) => {
   res.json({ id: data.id, ...data });
 });
 
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok"
+  });
+});
+
 // 🔥 server start
 app.listen(process.env.PORT || 3000, "0.0.0.0", () => {
   console.log("running");
