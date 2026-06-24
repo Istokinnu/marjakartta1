@@ -2,7 +2,7 @@
 <html lang="fi">
 <head>
   <meta charset="UTF-8" />
-  <title>Mustikkakartta</title>
+  <title>Havaintokartta</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -158,12 +158,19 @@ function loadPoints() {
 }
 
 function addMarker(p) {
+  const typeName = 
+    p.type === "savipuoli"
+      ? "Savipuoli mustikka"
+      : p.type === "laikkupikari"
+        ? "Mustikanlaikkupikari"
+        : p.type;
+
   const marker = L.marker([p.lat, p.lng], {
     icon: getIcon(p.type)
   });
 
   marker.bindPopup(`
-    <b>${p.type}</b><br/>
+    <b>${typeName}</b><br/>
 
     ${escapeHtml(p.note || "")}
 
@@ -183,7 +190,7 @@ function addMarker(p) {
 
     
   <br/> 
-  📍<a href="https://www.google.com/maps?q=${p.lat},${p.lng}" target="_blank">
+  <a href="https://www.google.com/maps?q=${p.lat},${p.lng}" target="_blank">
     Avaa Google Maps
   </a>
 `);
@@ -282,7 +289,7 @@ function openObservation(lat, lng) {
     </div>
 
     <div class="row">
-      <input id="note" placeholder="huomio..." style="width:150px" maxlength="120"/>
+      <input id="note" placeholder="kommentti..." style="width:150px" maxlength="120"/>
     </div>
 
     <button id="saveBtn">Tallenna</button>

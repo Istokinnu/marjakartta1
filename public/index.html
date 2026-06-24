@@ -2,7 +2,7 @@
 <html lang="fi">
 <head>
   <meta charset="UTF-8" />
-  <title>Marjakartta</title>
+  <title>Havaintokartta</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -62,11 +62,24 @@
       cursor: pointer;
       width: 100%;
     }
+    .button2 {
+      margin-top: 16px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      background: #4caf50;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+    }
 
     button:hover {
       background: #43a047;
     }
-
+   .button2:hover {
+      background: #43a047;
+    }
     /* MODAL */
     .modal {
       display: none;
@@ -80,6 +93,17 @@
       align-items: center;
     }
     .modal2 {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal3 {
       display: none;
       position: fixed;
       top: 0;
@@ -107,6 +131,14 @@
       overflow: hidden;
       text-align: center;
     }
+    .modal-content3 {
+      background: white;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 90%;
+      overflow: hidden;
+      text-align: center;
+    }
 
     .modal-content img {
       width: 100%;
@@ -120,30 +152,44 @@
     .modal-body2 {
       padding: 12px;
     }
+    .modal-body3 {
+      padding: 12px;
+    }
 
     .close {
       float: right;
       cursor: pointer;
       font-size: 18px;
     }
+    .intro-text {
+  color: #555;
+  margin-bottom: 20px;
+  }
+
+  h3 {
+    margin-bottom: 10px;
+  }
   </style>
 </head>
 
 <body>
 
 <div class="card">
-  <h1>🫐 Marjakartta</h1>
+  <h1>🫐 Havaintokartta</h1>
 
-  <p>
-    Tällä kartalla merkitään havaintoja kahdesta eri kohteesta:
+  <p class="intro-text">
+    Tutustu havaintokohteisiin ja katso, millaisia havaintoja kartalle kerätään.
   </p>
+
+
+  <h3>Havaintokohteet:</h3>
 
   <!-- KLIKKATTAVAT KORTIT -->
   <div class="mini-card" onclick="openModal('savipuoli')">
     <div class="emoji">🫐</div>
     <div>
       <b>Savipuoli mustikka</b><br/>
-      <small>---------------</small>
+      <small>Klikkaa nähdäksesi lisätietoja</small>
     </div>
   </div>
 
@@ -151,16 +197,15 @@
     <div class="emoji">🌿</div>
     <div>
       <b>Mustikanlaikkupikari</b><br/>
-      <small>Sieni mustikassa</small>
+      <small>Klikkaa nähdäksesi lisätietoja</small>
     </div>
   </div>
-
   <p>
-    Klikkaa kohdetta saadaksesi lisätietoa.
-  </p>
-  <p>
-      Klikkaa karttaa, lisää havainto ja tallenna sijainti.
-    </p>
+  Käy läpi alla olevat ohjeet ja kun olet valmis, siirry kartalle lisäämään havainto.
+</p>
+    <button class="button2" onclick="openModal2()">
+    📌 Ohjeet
+  </button>
   <button onclick="location.href='/kartta.html'">
     Avaa kartta
   </button>
@@ -171,13 +216,20 @@
     <div class="modal-body2">
       <span class="close" onclick="closeIntro()">✖</span>
 
-      <h2>👋 Tervetuloa Oulun yliopiston Marjakarttaan</h2>
+      <h2>👋 Tervetuloa Oulun yliopiston Mittaustekniikan yksikön Havaintokarttaan</h2>
       <p>
-        Tässä sovelluksessa voit merkitä havaintoja mustikoista ja niiden ilmiöistä kartalle.
+        Tämän sovelluksen avulla voit merkitä ja tallentaa
+        havaintoja kartalle seuraavista kohteista:
       </p>
+
       <p>
-        👉 Klikkaa karttaa lisätäksesi havainto<br>
-        👉 Valitse kohde ja tallenna sijainti
+        🫐 <b>Savipuoli mustikka</b><br>
+        🌿 <b>Mustikanlaikkupikari</b>
+      </p>
+
+      <p>
+        Aloita painamalla alla olevaa painiketta.
+        Tarkemmat käyttöohjeet löydät <b>Ohjeet</b>-painikkeesta.
       </p>
 
       <button onclick="closeIntro()">Aloita</button>
@@ -199,7 +251,19 @@
 
   </div>
 </div>
+<!-- MODAL -->
+<div class="modal3" id="modal3">
+  <div class="modal-content3">
 
+    <div class="modal-body3">
+      <span class="close" onclick="closeModal2()">✖</span>
+
+      <h2 id="modalTitle3"></h2>
+      <p id="modalText3"></p>
+    </div>
+
+  </div>
+</div>
 <script>
 const data = {
   savipuoli: {
@@ -227,6 +291,36 @@ function openModal(type) {
 function closeModal() {
   document.getElementById("modal").style.display = "none";
 }
+function openModal2() {
+
+  document.getElementById("modalTitle3").innerText = "📌 Ohjeet havainnon tekemiseen";
+  document.getElementById("modalText3").innerHTML = `
+    <b>1. Etsi havaintopaikka</b><br>
+    Etsi kartalta kohta, jossa havainto on tehty. 
+    Zoomaa tarvittaessa ja klikkaa karttaa.<br><br>
+
+    <b>2. Valitse havaintotyyppi</b><br>
+    Valitse, kumpi havaintotyyppi on kyseessä.<br><br>
+
+    <b>3. Lisää kommentti (valinnainen)</b><br>
+    Voit kirjoittaa havaintoon lyhyen kuvauksen. 
+    Älä lisää kommenttiin yhteystietoja.<br><br>
+
+    <b>4. Tallenna havainto</b><br>
+    Kun tiedot ovat valmiit, paina <b>"Tallenna"</b>.<br><br>
+
+    📍 <b>Paikannus</b><br>
+    Jos olet havaintopaikalla, voit käyttää laitteen sijaintia 
+    painamalla <b>"📍Paikanna sijainti"</b>-painiketta.
+    Sovellus pyytää luvan sijainnin käyttöön.
+  `;
+
+  document.getElementById("modal3").style.display = "flex";
+}
+function closeModal2() {
+  document.getElementById("modal3").style.display = "none";
+  
+}
 // Näytä intro heti sivun latauksessa
 window.onload = function() {
   document.getElementById("introModal").style.display = "flex";
@@ -235,6 +329,24 @@ window.onload = function() {
 function closeIntro() {
   document.getElementById("introModal").style.display = "none";
 }
+// Sulje modaalit klikkaamalla taustaa
+document.getElementById("modal").onclick = function(e) {
+  if (e.target === this) {
+    closeModal();
+  }
+};
+
+document.getElementById("modal3").onclick = function(e) {
+  if (e.target === this) {
+    closeModal2();
+  }
+};
+
+document.getElementById("introModal").onclick = function(e) {
+  if (e.target === this) {
+    closeIntro();
+  }
+};
 </script>
 
 </body>
