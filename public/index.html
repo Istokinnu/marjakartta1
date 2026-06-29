@@ -14,7 +14,37 @@
       align-items: center;
       justify-content: center;
       background: #f5f5f5;
+      flex-direction: column;
     }
+.footer-logos {
+  position: fixed;
+  bottom: 20px;
+  left: 30px;
+  right: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+.eu-logo {
+  width: 220px;
+  height: auto;
+  transform: translateY(0);
+}
+
+.right-logos {
+  display: flex;
+  flex-direction: row;  /* vierekkäin */
+  gap: 15px;
+  align-items: center;
+}
+
+.right-logos img {
+  width: 170px;
+  height: auto;
+  transform: translateY(30px);
+}
 
     .card {
       background: white;
@@ -23,6 +53,7 @@
       max-width: 420px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.1);
       text-align: center;
+      position: relative; /* TÄRKEÄ */
     }
 
     h1 {
@@ -155,6 +186,13 @@
     .modal-body3 {
       padding: 12px;
     }
+    
+.modal-body small {
+  display: block;
+  margin-top: 8px;
+  color: #777;
+  font-size: 12px;
+}
 
     .close {
       float: right;
@@ -165,16 +203,20 @@
   position: relative;
 }
 
+
 .image-modal .close {
   position: absolute;
   right: 10px;
   top: 10px;
-  float: none;
-  z-index: 10;
-  background: white;
+
+  background: rgba(0,0,0,0.5);
+  color: white;
+
   border-radius: 50%;
-  padding: 3px 6px;
+  padding: 4px 8px;
 }
+
+
     .intro-text {
   color: #555;
   margin-bottom: 20px;
@@ -187,17 +229,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  
+  gap: 8px;
+  flex-wrap: nowrap;
 }
 
 .title-row h1 {
   margin: 0;
 }
 
+
+
 .info-btn {
-  transform: translateX(40px);
+  position: absolute;
+  top: 16px;
+  right: 16px;
+
+  transform: none;
+  flex-shrink: 0;
+
   width: 30px;
   height: 30px;
   padding: 0;
@@ -220,15 +269,11 @@
   justify-content: center;
 
   box-shadow: 0 3px 8px rgba(0,0,0,0.25);
-  transition: 0.2s;
 }
 
 .info-btn:hover {
   background: #1565c0;
-  transform: translateX(40px) scale(1.1);
-}
-.info-btn {
-  position: relative;
+  transform: scale(1.1);
 }
 
 /* tooltip */
@@ -260,37 +305,23 @@
 .info-btn:hover::after {
   opacity: 1;
 }
-.logos-top {
-  margin-top: 25px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
 
+@media (max-width: 600px) {
+  .footer-logos {
+    left: 15px;
+    right: 15px;
+    bottom: 15px;
+  }
 
-.logos-top img {
-  width: 130px;
-  height: 70px;
-  object-fit: contain;
-}
+  .eu-logo {
+    width: 120px;
+    transform: translateY(5px);
+  }
 
-.logos-top .big-logo {
-  width: 200px;
-  height: 80px;
-}
-
-.logos-bottom {
-  margin-top: 10px;
-  display: flex;
-  justify-content: center;
-}
-
-.logos-bottom img {
-  width: 280px;
-  max-width: 90%;
-  height: auto;
+  .right-logos img {
+    width: 110px;
+    transform: translateY(15px);
+  }
 }
   </style>
 </head>
@@ -298,14 +329,10 @@
 <body>
 
 <div class="card">
-  <div class="title-row">
   <h1>🫐 Havaintokartta</h1>
-
   <button class="info-btn" onclick="openModal4()">
     i
   </button>
-</div>
-
   <p class="intro-text">
     Tutustu havaintokohteisiin ja katso, millaisia havaintoja kartalle kerätään.
   </p>
@@ -341,13 +368,20 @@
     Avaa kartta
   </button>
 </div>
+<div class="footer-logos">
+  <img class="eu-logo" src="/images/eu.png">
+
+  <div class="right-logos">
+    <img src="/images/kajaani_oulu.png">
+  </div>
+</div>
 <!-- INTRO MODAL -->
 <div class="modal2" id="introModal">
   <div class="modal-content2">
     <div class="modal-body2">
       <span class="close" onclick="closeIntro()">✖</span>
 
-      <h2>👋 Tervetuloa Oulun yliopiston Mittaustekniikan yksikön Havaintokarttaan</h2>
+      <h2>👋 Tervetuloa Oulun Yliopiston Mittaustekniikan yksikön Havaintokarttaan</h2>
       <p>
         Tämän sovelluksen avulla voit merkitä ja tallentaa
         havaintoja kartalle seuraavista kohteista:
@@ -357,14 +391,13 @@
         🫐 <b>Savipuoli mustikka</b><br>
         🌿 <b>Mustikanlaikkupikari</b>
       </p>
-
       <p>
-        Aloita painamalla alla olevaa painiketta.
         Tarkemmat käyttöohjeet löydät <b>Ohjeet</b>-painikkeesta.
       </p>
       <p>
         Tietoa projektista löydät <b>ℹ️</b>-painikkeesta.
       </p>
+      <p>Aloita painamalla alla olevaa painiketta.</p>
       <button onclick="closeIntro()">Aloita</button>
     </div>
   </div>
@@ -406,20 +439,6 @@
       
       <h2 id="modalTitle4"></h2>
       <p id="modalText4"></p>
-      <div class="logos-top">
-
-  <img class="big-logo" src="/images/eu.png">
-
-  <div class="small-logos">
-    <img src="/images/kainuu.png">
-    <img src="/images/kajaani.png">
-  </div>
-
-</div>
-
-<div class="logos-bottom">
-  <img src="/images/kaikki.png">
-</div>
     </div>
   </div>
 </div>
@@ -427,13 +446,34 @@
 const data = {
   savipuoli: {
     title: "🫐 Savipuoli mustikka",
-    text: "....................",
-    img: "/images/mustikka3.png"
+    text: `<em> Taudin oireisiin kuuluvat mustikan muuttuminen toispuoleisesti pehmeäksi tai litistyneeksi ja marjoissa on havaittavissa harmahtava täplä. Savipuolisia mustikoita esiintyy erityisesti kosteissa paikoissa sateisina kesinä. </em>
+    <br>
+    <small> 
+      Kuva: Oulun Yliopiston Mittaustekniikan yksikkö
+      </small>
+      `,
+    img: "/images/mustikka6.png"
   },
   laikkupikari: {
     title: "🌿 Mustikanlaikkupikari",
-    text: "Sieni, joka voi esiintyä mustikassa ja vaikuttaa marjan ulkonäköön.",
-    img: "/images/mustikka4.png"
+    
+
+text: `
+  <em>Taudin oireisiin kuuluvat mustikan varpujen mustuminen, latvojen kuoleminen sekä lehtiin muodostuvat ruskeat, kuivuneet täplät. Sairaissa kasvustoissa lehdet ovat usein karisseet ja marjojen määrä on huomattavasti vähentynyt tai ne puuttuvat kokonaan.</em>
+
+  <br><br>
+
+  <a href="https://fi.wikipedia.org/wiki/Mustikanlaikkupikari" target="_blank">
+  Lue lisää Wikipediasta ↗
+  </a>
+
+  <br><br>
+
+  <small>
+    Kuva: Jerzy Opioła, Wikimedia Commons (CC BY-SA 4.0)
+  </small>
+`,
+    img: "https://upload.wikimedia.org/wikipedia/commons/2/2a/Valdensinia_heterodoxa_BW3_%285%29.jpg"
   }
 };
 
@@ -442,7 +482,7 @@ function openModal(type) {
 
   document.getElementById("modalImg").src = d.img;
   document.getElementById("modalTitle").innerText = d.title;
-  document.getElementById("modalText").innerText = d.text;
+  document.getElementById("modalText").innerHTML = d.text;
 
   document.getElementById("modal").style.display = "flex";
 }
@@ -496,17 +536,6 @@ function openModal4() {
       tarpeisiin. Käyttäjien tekemät havainnot auttavat
       aineiston keräämisessä ja tutkimuksen toteuttamisessa.
     </p>
-
-    <p>
-      <b>Tähän voit myöhemmin lisätä esimerkiksi:</b>
-    </p>
-
-    <ul style="text-align:left;">
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-    </ul>
   `;
 
   document.getElementById("modal4").style.display = "flex";
