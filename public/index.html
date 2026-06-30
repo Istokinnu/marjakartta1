@@ -206,6 +206,23 @@
   position: relative;
 }
 
+#modalText4 {
+    max-width: 800px;
+    margin: 0 auto;
+    color: #333;
+    font-size: 18px;
+}
+
+#modalText4 a {
+    color: #0056b3;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+#modalText4 a:hover {
+    text-decoration: underline;
+}
+
 
 .image-modal .close {
   position: absolute;
@@ -338,7 +355,8 @@
     i
   </button>
   <p class="intro-text">
-    Tutustu havaintokohteisiin ja katso, millaisia havaintoja kartalle kerätään.
+    Tällä kartalla kerätään havaintoja mustikassa esiintyvistä taudeista tutkimuskäyttöä varten. 
+    <br>Tutustu alla oleviin havaintokohteisiin ennen havaintojen kirjaamista.
   </p>
 
 
@@ -530,17 +548,51 @@ function openModal4() {
     "ℹ️ Tietoa projektista";
 
   document.getElementById("modalText4").innerHTML = `
-    <p>
-      Tämä havaintokartta on osa Oulun yliopiston
-      Mittaustekniikan yksikön tutkimusprojektia.
-    </p>
+<div style="text-align:left; line-height:1.6; font-size:1rem;">
 
-    <p>
-      Kartan avulla kerätään havaintoja tutkimuksen
-      tarpeisiin. Käyttäjien tekemät havainnot auttavat
-      aineiston keräämisessä ja tutkimuksen toteuttamisessa.
-    </p>
-  `;
+  <p>
+    Tämä havaintokartta on osa <strong>Luonnontuotealan ekosysteemi itäiseen Suomeen -hanketta</strong>, jonka tavoitteena on kehittää
+     itäisen Suomen luonnontuotealaa ja edistää mm. kotimaisten luonnontuotteiden keräämistä ja käyttöä. 
+  </p>
+
+  <p><strong>Hankkeen toteuttajina ovat:</strong></p>
+  <ul>
+    <li>Oulun yliopiston Mittaustekniikan yksikkö</li>
+    <li>Luonnonvarakeskus (Luke)</li>
+    <li>Arktiset Aromit ry</li>
+    <li>Helsingin yliopiston Ruralia-instituutti</li>
+  </ul>
+
+  <p>
+    Hankkeen rahoittajana toimii Kainuun liitto ja se on Euroopan unionin osarahoittama.
+  </p>
+
+  <p> Lisätietoa löytyy hankkeen 
+    <a href="https://www.oulu.fi/fi/projektit/luonnontuotealan-ekosysteemi-itaiseen-suomeen"
+       target="_blank"
+       rel="noopener noreferrer">
+      verkkosivuilta.
+    </a>
+  </p>
+
+  <hr>
+
+  <p>
+    Kartan avulla kerätään havaintoja mustikassa esiintyvistä sairauksista tutkimuskäyttöä varten. 
+    Havainnot auttavat saamaan lisätietoa näiden tautien esiintyvyydestä, minkä lisäksi ne helpottavat sairaiden mustikoiden paikantamisessa, jotta tutkimuksessa tarvittavia näytteitä saadaan kerättyä.
+  </p>
+
+  <p>
+    <strong>Havaintojen jättäminen on vapaaehtoista.</strong>
+    Jokainen on tervetullut kirjaamaan havaintonsa mistä päin Suomea tahansa.
+  </p>
+
+  <p style="text-align:center;">
+    <strong>Kiitos osallistumisesta!</strong>
+  </p>
+
+</div>
+`;
 
   document.getElementById("modal4").style.display = "flex";
 }
