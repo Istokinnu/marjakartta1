@@ -165,14 +165,20 @@
       overflow: hidden;
       text-align: center;
     }
-    .modal-content3 {
-      background: white;
-      border-radius: 12px;
-      max-width: 500px;
-      width: 90%;
-      overflow: hidden;
-      text-align: center;
-    }
+    
+.modal-content3 {
+  background: white;
+  border-radius: 12px;
+  max-width: 700px;
+  width: 95%;
+
+  max-height: 90vh;
+  overflow-y: auto;
+
+  text-align: center;
+  position: relative;
+}
+
 
     .modal-content img {
       width: 100%;
@@ -188,6 +194,7 @@
     }
     .modal-body3 {
       padding: 12px;
+      max-height: calc(90vh - 50px);
     }
     
 .modal-body small {
@@ -301,8 +308,8 @@
   content: "Tietoa projektista";
   position: absolute;
   top: 50%;
-  right: 120%;              /* 🔥 siirretään vasemmalle napista */
-  left: auto;               /* tärkeä */
+  right: 120%;              
+  left: auto;               
   transform: translateY(-50%);
   bottom: auto;
 
@@ -328,10 +335,24 @@
 }
 
 @media (max-width: 600px) {
+
   .footer-logos {
-    left: 15px;
-    right: 15px;
-    bottom: 15px;
+    position: relative;
+    width: 100%;
+
+    left: auto;
+    right: auto;
+    bottom: auto;
+
+    margin-top: 20px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .card {
+    margin-bottom: 20px;
   }
 
   .eu-logo {
@@ -344,6 +365,7 @@
     transform: translateY(30px);
   }
 }
+
   </style>
 </head>
 
@@ -356,7 +378,7 @@
   </button>
   <p class="intro-text">
     Tällä kartalla kerätään havaintoja mustikassa esiintyvistä taudeista tutkimuskäyttöä varten. 
-    <br>Tutustu alla oleviin havaintokohteisiin ennen havaintojen kirjaamista.
+    <br>Tutustu havaintokohteisiin ennen havaintojen kirjaamista.
   </p>
 
 
