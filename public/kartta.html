@@ -95,7 +95,7 @@ fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries/F
   .then(data => {
 
     // ✅ buffer 1 km
-    finlandBuffered = turf.buffer(data, 8, { units: "kilometers" });
+    finlandBuffered = turf.buffer(data, 45, { units: "kilometers" });
 
     finlandLayer = L.geoJSON(finlandBuffered, {
       style: {
