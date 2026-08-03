@@ -107,7 +107,9 @@ fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries/F
 
 
 const clusterGroup = L.markerClusterGroup({
-  showCoverageOnHover: false
+  showCoverageOnHover: false,
+  animate: true,
+  maxClusterRadius: 100
 });
 map.addLayer(clusterGroup);
 
@@ -130,17 +132,29 @@ function getIcon(type) {
 }
 
 function applyFilter() {
-  const showSavipuoli = document.getElementById("showSavipuoli").checked;
-  const showLaikkupikari = document.getElementById("showLaikkupikari").checked;
+
+  const showSavipuoli =
+    document.getElementById("showSavipuoli").checked;
+
+  const showLaikkupikari =
+    document.getElementById("showLaikkupikari").checked;
+
+  clusterGroup.clearLayers();
+
+  const layers = [];
 
   markers.forEach(m => {
-    const visible =
-      (m.type === "savipuoli" && showSavipuoli) ||
-      (m.type === "laikkupikari" && showLaikkupikari);
 
-    if (visible) clusterGroup.addLayer(m.marker);
-    else clusterGroup.removeLayer(m.marker);
+    if (
+      (m.type === "savipuoli" && showSavipuoli) ||
+      (m.type === "laikkupikari" && showLaikkupikari)
+    ) {
+      layers.push(m.marker);
+    }
+
   });
+
+  clusterGroup.addLayers(layers);
 }
 
 document.getElementById("showSavipuoli").onchange = applyFilter;
@@ -150,9 +164,17 @@ function loadPoints() {
   fetch("/points")
     .then(r => r.json())
     .then(points => {
+
       markers = [];
       clusterGroup.clearLayers();
-      points.forEach(addMarker);
+
+      const layers = [];
+
+      points.forEach(p => {
+        const marker = addMarker(p);
+        layers.push(marker);
+      });
+
       applyFilter();
     });
 }
@@ -197,7 +219,8 @@ function addMarker(p) {
 
 
   markers.push({ marker, type: p.type });
-  clusterGroup.addLayer(marker);
+
+  return marker;
 }
 
 /* ✅ MUUTOS 2: polygon check */
